@@ -108,8 +108,7 @@ class jangi(object):
 
 	def __init__(self):
 		self.turnName = ["RED","GREEN"]
-		self.Turn = 0 # RED or GREEN
-		self.message = ""
+		self.Turn = 0 # 
 		self.gameboard = {}
 
 		"""
@@ -134,6 +133,51 @@ class jangi(object):
 		self.gameboard[(3,2)] = Sang("GREEN",(3,2),"Sang")
 		self.gameboard[(2,1)] = Ja("GREEN",(2,1),"Ja")
 
+	def winnerCheck(self):
+		'''
+			return 0 or 1 or 2
+			0 : not game finish
+			1 : Red win
+			2 : Green win
+		'''
+
+		#1 King Live check
+		REDKingLive=False
+		GREENKingLive=False
+
+		#2 Conquer check
+		REDConquer = False
+		GREENConquer = False
+
+		for i in range(0,4):
+			for j in range(0,3):
+				item = self.gameboard.get((i,j))
+				if item:
+					if item.name == "King" and item.Color =="RED":
+						REDKingLive = True
+
+						if (item.position[0] == 3) and (self.Turn%2 == 0):
+							REDConquer = True
+
+					if item.name == "King" and item.Color =="GREEN":
+						GREENKingLive = True
+						
+						if (item.position[0] == 0) and (self.Turn%2 == 1):
+							GREENConquer = True
+
+		if GREENKingLive == False or REDConquer == True:
+			print("=================")
+			print("==== RED Win ====")
+			print("=================")
+			return 1
+
+		elif REDKingLive == False or GREENConquer == True:
+			print("===================")
+			print("==== GREEN Win ====")
+			print("===================")
+			return 2
+		return 0
+
 	def _printGame(self):
 		self.__printBoard()
 		self.__printCaptive()
@@ -151,12 +195,13 @@ class jangi(object):
 				print("%-5s"%str(item)+"|", end=" ")
 			print()
 			print("  "+"ㅡ"*11)
-
+		print()
 	def __printCaptive(self):
 		print(" y|  4   |  5   |  6   |  7   |  8   |")
 		print("x ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
 		print("4",self.REDCaptive, "REDCaptive")
 		print("5",self.GREENCaptive,"GREENCaptive")
+		print()
 
 	def iscanSelect(self,x,y):
 		if x in (0,1,2,3) and y in (0,1,2):
@@ -191,7 +236,6 @@ class jangi(object):
 				target = self.REDCaptive[y1-4]
 			elif x1 == 5 and y1 in (4,5,6,7,8):
 				target = self.GREENCaptive[y1-4]
-			print(target.availableMoves(self.gameboard))
 			if (x2,y2) in target.availableMoves(self.gameboard):
 				return True
 		return False
@@ -218,7 +262,6 @@ class jangi(object):
 
 			target1.position = (x2,y2)
 			# Ja가 상대편 진영에 가면 Hoo로 변환
-			print(target1.name, target1.name =="Ja  ")
 			if target1.name == "Ja  ":
 				if target1.Color == "RED" and target1.position[0] == 3:
 					target1 = Hoo("RED",(x2,y2),"Hoo")
@@ -230,28 +273,50 @@ class jangi(object):
 
 			return True
 
+
+
 	def main(self):
 		"""
 			CLI 로 실행
 		"""
 
 		running = True
+		winner = 0
 		while running:
+			winner = self.winnerCheck()
+			if winner:
+				running = False
+				self._printgame()
+				break
 
-			#select piece
+			# game state
 			self._printGame()
 			
+			# select piece
 			try:x1,y1 = map(int,input('select piece (x y) : ').split())
 			except:continue
 
+			# select move cord
 			if self.iscanSelect(x1,y1):
 				try:x2,y2 = map(int,input('select move position (x y) : ').split())
 				except:continue
 			else: continue
 
+			# do move
 			if self.iscanMove(x1,y1,x2,y2):
 				self.Move(x1,y1,x2,y2)
 			else: continue
+
+		if winner == 1:
+			print("=================")
+			print("==== RED Win ====")
+			print("=================")
+		elif winner == 2:
+			print("===================")
+			print("==== GREEN Win ====")
+			print("===================")
+		else:
+			print("ERROR?")
 
 if __name__ == "__main__":
 	game = jangi()
