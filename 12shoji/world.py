@@ -10,6 +10,7 @@ class _Piece(object):
 		self.image = pg.image.load('../images/{color}_{name}.png'.format(color = color, name=name))
 		self.click_image = pg.image.load('../images/{color}_{name} (2).png'.format(color=color, name=name))
 		self.click = False
+		self.img_size = self.image.get_size()
 		self.position = (0,0)
 
 	def __call__(self):
@@ -19,7 +20,11 @@ class _Piece(object):
 			return self.image.copy()
 
 	def get_size(self):
-		return self.image.get_size()
+		return self.img_size
+
+	def click(self):
+		self.click = True
+
 
 class _Board(object):
 	def __init__(self):
@@ -27,7 +32,11 @@ class _Board(object):
 		self.size = self.get_size()
 		self.position = (0,0)
 		self.square_size = (self.size[0]/3, self.size[1]/4)
-		self.square_positions = { (i,j) : [self.position[0]+ i*self.square_size[0], self.position[1]+ j*self.square_size[1]]}
+		self.square_positions = {}
+
+		for i in range(3):
+			for j in range(4):
+				self.square_positions[(i,j)] = [self.position[0]+ i*self.square_size[0], self.position[1]+ j*self.square_size[1]]
 
 	def __call__(self):
 		return self.image
@@ -35,7 +44,7 @@ class _Board(object):
 	def get_size(self):
 		return self.image.get_size()
 
-	def update_grid(self):
+	def update_grid(self):r 
 
 
 class _World(object):
@@ -79,7 +88,7 @@ class _World(object):
 		new_Board = self.create_board()
 		for x,y in _game.gameboard:
 			piece = _game.gameboard[(x,y)]
-			target = eval("self.{Color}_{Name}".format(Color = piece.Color,Name = piece.name))
+			target = eval("self.{Color}_{Name}".format(Color = piece.Color, Name = piece.name))
 			position = self.grid_positions[x][y]
 			new_Board.blit(target(),position)
 		_surface.blit(new_Board,self.Board_position)
@@ -127,7 +136,7 @@ class _World(object):
 					if not select1:
 						x1,y1 = self.pos2cord(event.pos)
 						if _game.iscanSelect(x1,y1):
-							select1 = True
+							select1 =True
 
 					elif select1:
 						x2,y2 = self.pos2cord(event.pos)
